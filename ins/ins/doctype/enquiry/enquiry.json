@@ -1,0 +1,238 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "ENQUIRY.-.#####",
+ "creation": "2023-11-02 16:19:15.196417",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "series",
+  "enquiry_from",
+  "lead",
+  "customer",
+  "organization_name",
+  "column_break_5",
+  "company",
+  "transaction_date",
+  "probability",
+  "enquiry_type",
+  "address_and_contact_section",
+  "contact_person",
+  "email_id",
+  "column_break_13",
+  "place",
+  "customer_address",
+  "address_display",
+  "column_break_12",
+  "contact",
+  "contact_mobile",
+  "contact_email",
+  "section_break_13",
+  "items",
+  "amended_from",
+  "enquiry_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "series",
+   "fieldtype": "Select",
+   "label": " Series",
+   "options": "ENQUIRY-"
+  },
+  {
+   "fieldname": "enquiry_from",
+   "fieldtype": "Select",
+   "label": "Enquiry From",
+   "options": "Customer\nLead"
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Lead\"",
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Lead",
+   "options": "Lead"
+  },
+  {
+   "fetch_if_empty": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only_depends_on": "eval: doc.enquiry_from == \"Lead\""
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Lead\"",
+   "fetch_from": "lead.company_name",
+   "fieldname": "organization_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Organization Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "probability",
+   "fieldtype": "Select",
+   "label": "Probability",
+   "options": "\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%"
+  },
+  {
+   "fieldname": "enquiry_type",
+   "fieldtype": "Select",
+   "label": "Enquiry Type",
+   "options": "\nInbound\nOutbound\nBuyback Quotation"
+  },
+  {
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact",
+   "options": "fa fa-bullhorn"
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Lead\"",
+   "fetch_from": "lead.lead_name",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Person Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Lead\"",
+   "fetch_from": "lead.email",
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email Id",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Lead\"",
+   "fetch_from": "lead.place",
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "label": "Place",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Customer\"",
+   "fieldname": "customer_address",
+   "fieldtype": "Link",
+   "label": "Customer Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Address Display",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Customer\"",
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact"
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Customer\"",
+   "fetch_from": "contact.phone",
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Mobile No"
+  },
+  {
+   "depends_on": "eval: doc.enquiry_from == \"Customer\"",
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Enquiry Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Enquiry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "enquiry_status",
+   "fieldtype": "Data",
+   "label": "Enquiry Status",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Customer",
+   "link_fieldname": "customer_name"
+  },
+  {
+   "link_doctype": "Lead",
+   "link_fieldname": "name"
+  },
+  {
+   "link_doctype": "Quotation",
+   "link_fieldname": "enquiry"
+  }
+ ],
+ "modified": "2024-07-27 17:06:08.492663",
+ "modified_by": "Administrator",
+ "module": "INS",
+ "name": "Enquiry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

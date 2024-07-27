@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": " VF.-.#####",
+ "creation": "2023-11-23 18:03:37.844286",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "series",
+  "customer",
+  "date",
+  "customer_attendee",
+  "column_break_5",
+  "insmart_attendee",
+  "place",
+  "section_break_8",
+  "visit_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "series",
+   "fieldtype": "Select",
+   "label": " Series",
+   "options": "VF-"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "customer_attendee",
+   "fieldtype": "Link",
+   "label": "Customer Attendee",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insmart_attendee",
+   "fieldtype": "Link",
+   "label": "InSmart Attendee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "label": "Place"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "visit_table",
+   "fieldtype": "Table",
+   "label": "Visit Table",
+   "options": "Visit Table"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "Customer",
+   "link_fieldname": "visit_form"
+  }
+ ],
+ "modified": "2024-04-18 17:39:18.069184",
+ "modified_by": "Administrator",
+ "module": "INS",
+ "name": "Visit Form",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

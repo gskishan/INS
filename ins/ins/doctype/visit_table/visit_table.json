@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-23 18:14:34.442270",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_feedback",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_feedback",
+   "fieldtype": "Data",
+   "label": "Customer Feedback"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-04-18 17:36:32.329267",
+ "modified_by": "Administrator",
+ "module": "INS",
+ "name": "Visit Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
