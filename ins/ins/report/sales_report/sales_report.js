@@ -7,7 +7,7 @@ frappe.query_reports["Sales Report"] = {
 			fieldname:"customer",
 			label: __("Customer"),
 			fieldtype: "Link",
-			options: "Customer"
+			options: "Customer",
 		},
 		{
 			fieldname:"from_date",
