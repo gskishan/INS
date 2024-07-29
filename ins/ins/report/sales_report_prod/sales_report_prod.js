@@ -14,14 +14,12 @@ frappe.query_reports["Sales Report Prod"] = {
 			"label": __("Start Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), -1),
-			"reqd": 1
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("End Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.nowdate(),
-			"reqd": 1
 		}
 	]
 };
