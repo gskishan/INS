@@ -7,7 +7,7 @@ from frappe.model.document import Document
 class Enquiry(Document):
     
     @frappe.whitelist()
-    def update_data():
+    def update_data(self):
         for d in get_data():
             if frappe.db.exists("Enquiry", d.get("name")):
                 doc=frappe.get_doc("Enquiry",d.get("name"))
