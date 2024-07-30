@@ -6,14 +6,16 @@ from frappe import _
 
 @frappe.whitelist()
 def before_submit(self,method):
-	if self.enquiry:
-		if frappe.db.exists("Enquiry", self.enquiry):
-			enq=frappe.get_doc("Enquiry", self.enquiry)
-			enq.db_set("status","Quotation")
+	# if self.enquiry:
+	# 	if frappe.db.exists("Enquiry", self.enquiry):
+	# 		enq=frappe.get_doc("Enquiry", self.enquiry)
+	# 		enq.db_set("status","Quotation")
+	pass
 
 @frappe.whitelist()
 def on_cancel(self,method):
-	if self.enquiry:
-		if frappe.db.exists("Enquiry", self.enquiry):
-			enq=frappe.get_doc("Enquiry", self.enquiry)
-			enq.db_set("status","")
+	# if self.enquiry:
+	# 	if frappe.db.exists("Enquiry", self.enquiry):
+	# 		enq=frappe.get_doc("Enquiry", self.enquiry)
+	# 		enq.db_set("status","")
+	pass
