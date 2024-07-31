@@ -207,6 +207,5 @@ fixtures=[
 	"Client Script",
 	"Server Script",
 	"Print Format",
-	"Report",
-	"Workspace"
+	"Report"
 ]
