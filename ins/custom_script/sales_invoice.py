@@ -50,10 +50,12 @@ def autoname(doc, method=None):
 
 def set_name(doc):
     if 'param' in doc.naming_series:
-        year=frappe.defaults.get_global_default('fiscal_year')
+        year=frappe.defaults.get_global_default('year_start_date')
+        if year:
+            year = year[0:4]
         month = re.findall(r'\d+', utils.today())[1]
         vertical = doc.vertical
-        type = doc.type
+        type_type = doc.type
         company_code = ""
         if doc.company == "insmart Systems":
             company_code = "10000"
@@ -74,4 +76,4 @@ def set_name(doc):
         if last_number == 0:
             last_number = int(company_code) + 1
 
-        doc.name = year + type + month + vertical + str(last_number)
+        doc.name = year + type_type + month + vertical + str(last_number)
