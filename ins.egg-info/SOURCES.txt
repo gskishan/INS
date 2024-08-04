@@ -22,9 +22,7 @@ ins/fixtures/client_script.json
 ins/fixtures/custom_field.json
 ins/fixtures/print_format.json
 ins/fixtures/property_setter.json
-ins/fixtures/report.json
 ins/fixtures/server_script.json
-ins/fixtures/workspace.json
 ins/ins/__init__.py
 ins/ins/doctype/__init__.py
 ins/ins/doctype/enquiry/__init__.py
