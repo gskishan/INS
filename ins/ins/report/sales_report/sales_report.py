@@ -160,13 +160,13 @@ def get_data(filters=None):
         'to_date': to_date,
     }, as_dict=True)
 
-    total_amount = sum(row['amount'] for row in data)
+    # total_amount = sum(row['amount'] for row in data)
     
-    # Add a row for total amount at the end of the data
-    if data:
-        data.append({
-            'customer': "Total Amount",
-            'amount': total_amount
-        })
+    # # Add a row for total amount at the end of the data
+    # if data:
+    #     data.append({
+    #         'customer': "Total Amount",
+    #         'amount': total_amount
+    #     })
     
     return data
