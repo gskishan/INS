@@ -50,7 +50,8 @@ def autoname(doc, method=None):
 
 def set_name(doc):
     if 'param' in doc.naming_series:
-        year=frappe.defaults.get_global_default('year_start_date')
+        from erpnext.accounts.utils import get_fiscal_year
+        year=get_fiscal_year().name
         if year:
             year = year[0:4]
         month = re.findall(r'\d+', utils.today())[1]
