@@ -111,172 +111,62 @@ def get_columns(filters= None):
 	]
 
 
-def get_data(filters= None):
+def get_data(filters=None):
+    customer = filters.customer
+    from_date = filters.from_date
+    to_date = filters.to_date
 
-	customer = filters.customer
-	from_date = filters.from_date
-	to_date = filters.to_date
-	
-	result = []
-	
-	resultant_leads = get_leads(customer,from_date, to_date)
-	resultant_enquiry = get_enquiry()
-	resultant_quotation = get_quotations()
-	
-	total_amount = 0
-	# Loop All Leads if it matches then update the row
-	for each_lead in resultant_leads:
-		row = {
-				'customer': customer, 
-				'place': '', 
-				'vertical': '', 
-				'lead_id': '', 
-				'enquiry_id': '', 
-				'quotation_id': '', 
-				'item_code': '', 
-				'item': '', 
-				'item_group': '', 
-				'qty': 0, 
-				'rate': 0, 
-				'amount': 0,
-				'probability': '', 
-				'link_lead': '',
-				'link_enquiry': '',
-				'expected_order_date':'',
-				'status': ''
-			}
-		
-		row.update(each_lead)
-		
-		# Check for Linked Enquiry if it matches then update the row
-		for each_enquiry in resultant_enquiry:
+    query = """
+        SELECT
+            l.og_name AS customer,
+            l.place,
+            l.vertical,
+            l.name AS lead_id,
+            e.name AS enquiry_id,
+            q.name AS quotation_id,
+            COALESCE(qi.item_code, ei.item_code) AS item_code,
+            COALESCE(qi.item_name, ei.item_name) AS item,
+            COALESCE(qi.item_group, ei.item_group) AS item_group,
+            COALESCE(qi.qty, ei.qty) AS qty,
+            COALESCE(qi.rate, ei.rate) AS rate,
+            COALESCE(qi.amount, ei.amount) AS amount,
+            COALESCE(q.probability, e.probability, l.probability) AS probability,
+            l.expected_order_date,
+            COALESCE(q.status, e.enquiry_status, l.status) AS status
+        FROM
+            `tabLead` l
+        LEFT JOIN
+            `tabEnquiry` e ON l.name = e.lead
+        LEFT JOIN
+            `tabEnquiry Item` ei ON e.name = ei.parent
+        LEFT JOIN
+            `tabQuotation` q ON e.name = q.enquiry
+        LEFT JOIN
+            `tabQuotation Item` qi ON q.name = qi.parent
+        WHERE
+            1=1
+    """
 
-			if each_lead["lead_id"] == each_enquiry['link_lead'] and each_enquiry["item_code"] == each_lead["item_code"]:
-				row.update(each_enquiry)
+    if customer:
+        query += " AND l.og_name = %(customer)s"
+    if from_date and to_date:
+        query += " AND l.enquiry_date BETWEEN %(from_date)s AND %(to_date)s"
 
-				amended_quotation = {}
-				# Check for Linked Quotation if it matches then update the row
-				for each_quotation in resultant_quotation:
-					if each_quotation["amended_from"]:
-						if each_enquiry["enquiry_id"] == each_quotation["link_enquiry"] and each_enquiry["item_code"] == each_quotation["item_code"]:
-							row.update(each_quotation)
-							amended_quotation = each_quotation
-					else:
-						if each_enquiry["enquiry_id"] == each_quotation["link_enquiry"] and each_enquiry["item_code"] == each_quotation["item_code"]:
-							row.update(each_quotation)
+    query += " ORDER BY l.name, e.name, q.name"
 
-				if amended_quotation:
-					row.update(amended_quotation)
+    data = frappe.db.sql(query, {
+        'customer': customer,
+        'from_date': from_date,
+        'to_date': to_date,
+    }, as_dict=True)
 
-		result.append(row)
-		total_amount += row["amount"]
-	result.append({
-		'customer': "Total Amount", 
-		'amount': total_amount
-	})
-	return result
-
-
-
-def get_leads(customer, from_date, to_date):
-
-	filters={}
-	if customer:
-		filters['og_name'] = customer
-	if from_date and to_date:
-		filters["enquiry_date"] = ["between", [from_date, to_date]]
-
-	# Get Lead
-	leads = frappe.db.get_all('Lead',
-		filters=filters,
-		fields=['name', 'og_name'],
-	)
-
-	result = []
-	for each in leads:
-		each_lead = frappe.get_doc("Lead", each.name)
-		
-		for each_item in each_lead.items: 
-			row={}
-			row["customer"] =  each.og_name 
-			row["lead_id"] =  each.name 
-			row["item_code"] = each_item.item_code 
-			row["item"] = each_item.item_name 
-			row["item_group"] = each_item.item_group 
-			row["qty"] = each_item.qty 
-			row["rate"] = each_item.rate 
-			row["amount"] = each_item.amount
-			row["expected_order_date"] = each_lead.expected_order_date 
-			row["probability"] = each_lead.probability 
-			row["place"] = each_lead.place 
-			row["status"] = each_lead.status 
-			row["vertical"] = each_lead.vertical 
-
-			result.append(row)
-
-	return result
-
-
-
-def get_enquiry():
-
-	# Get Enquiry
-	enquiry = frappe.db.get_all('Enquiry',
-		fields=['name','customer'],
-	)
-
-	result = []
-	for each in enquiry:
-		each_enq= frappe.get_doc("Enquiry", each.name)
-		for each_item in each_enq.items:
-			row = {}
-			row["customer"] =  each.customer 
-			row["enquiry_id"] = each.name
-			row["item_code"] = each_item.item_code 
-			row["item"] = each_item.item_name
-			row["item_group"] = each_item.item_group
-			row["qty"] = each_item.qty
-			row["rate"] = each_item.rate
-			row["amount"] = each_item.amount
-			row["link_lead"] = each_enq.lead 
-			row["status"] = each_enq.enquiry_status 
-			row["expected_order_date"] = each_enq.expected_order_date 
-			row["probability"] = each_enq.probability 
-			
-			result.append(row)
-
-
-	return result
-
-
-
-
-def get_quotations():
-
-	# Get Quotation
-	quotations = frappe.db.get_all('Quotation',
-		fields=['name','party_name', 'amended_from'],
-	)
-
-	result = []
-	for each in quotations:
-		each_quotation = frappe.get_doc("Quotation", each.name)
-		for item in each_quotation.items:
-			row = {}
-			row["customer"] =  each.party_name 
-			row["quotation_id"] = each.name
-			row["item_code"] = item.item_code
-			row["item"] = item.item_name
-			row["item_group"] = item.item_group # Need to add this Field fetch it from Item
-			row["qty"] = item.qty
-			row["rate"] = item.rate
-			row["amount"] = item.amount
-			row["link_enquiry"] = each_quotation.enquiry 
-			row["status"] = each_quotation.status 
-			row["expected_order_date"] = each_quotation.valid_till 
-			row["probability"] = each_quotation.probability 
-			row["amended_from"] = each.amended_from
-
-			result.append(row)
-
-	return result
+    total_amount = sum(row['amount'] for row in data)
+    
+    # Add a row for total amount at the end of the data
+    if data:
+        data.append({
+            'customer': "Total Amount",
+            'amount': total_amount
+        })
+    
+    return data
