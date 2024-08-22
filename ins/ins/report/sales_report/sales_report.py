@@ -132,7 +132,10 @@ def get_data(filters=None):
             COALESCE(qi.amount, ei.amount) AS amount,
             COALESCE(q.probability, e.probability, l.probability) AS probability,
             l.expected_order_date,
-            COALESCE(q.status, e.enquiry_status, l.status) AS status
+            CASE
+		    WHEN e.docstatus = 2 THEN 'Cancelled'
+		    ELSE COALESCE(q.status, e.enquiry_status, l.status)
+		END AS status
         FROM
             `tabLead` l
         LEFT JOIN
