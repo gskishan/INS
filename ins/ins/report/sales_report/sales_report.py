@@ -156,12 +156,14 @@ def get_data(filters=None):
         query += " AND l.enquiry_date BETWEEN %(from_date)s AND %(to_date)s"
 
     query += "    GROUP BY ei.item_code ORDER BY l.name, e.name, q.name"
+	
 
     data = frappe.db.sql(query, {
         'customer': customer,
         'from_date': from_date,
         'to_date': to_date,
     }, as_dict=True)
+    frappe.errprint(query)
 
     # total_amount = sum(row['amount'] for row in data)
     
