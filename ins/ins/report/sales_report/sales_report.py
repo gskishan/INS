@@ -169,9 +169,14 @@ def get_data(filters=None):
         e.probability AS probability,
         l.expected_order_date,
         CASE
-            WHEN e.docstatus = 2 THEN 'Cancelled'
-            ELSE e.enquiry_status
-        END AS status
+	WHEN e.enquiry_status IS NOT NULL THEN e.enquiry_status
+	ELSE 
+		CASE
+			WHEN e.docstatus = 2 THEN 'Cancelled'
+			WHEN e.docstatus = 0 THEN 'Draft'
+			WHEN e.docstatus = 1 THEN 'Submitted'
+		END
+	END AS status
     FROM
         `tabLead` l
     JOIN
