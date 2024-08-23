@@ -115,40 +115,78 @@ def get_data(filters=None):
     customer = filters.customer
     from_date = filters.from_date
     to_date = filters.to_date
+    cond=""
+    if customer:
+          cond="""and l.enquiry_date BETWEEN "{1}" AND "{2}" l.og_name = "{0}" """.format(customer,from_date,to_date)
 
     query = """
-        SELECT
-            l.og_name AS customer,
-            l.place,
-            l.vertical,
-            l.name AS lead_id,
-            e.name AS enquiry_id,
-            q.name AS quotation_id,
-	    ei.item_code AS item_code,
-            ei.item_name AS item,
-            ei.item_group AS item_group,
-            ei.qty AS qty,
-            ei.rate AS rate,
-            ei.amount AS amount,
-            COALESCE(q.probability, e.probability, l.probability) AS probability,
-            l.expected_order_date,
-            CASE
-		    WHEN e.docstatus = 2 THEN 'Cancelled'
-		    ELSE COALESCE(q.status, e.enquiry_status, l.status)
-		END AS status
-        FROM
-            `tabLead` l
-        LEFT JOIN
-            `tabEnquiry` e ON l.name = e.lead
-        LEFT JOIN
-            `tabEnquiry Item` ei ON e.name = ei.parent
-        LEFT JOIN
-            `tabQuotation` q ON e.name = q.enquiry
-        LEFT JOIN
-            `tabQuotation Item` qi ON q.name = qi.parent
-        WHERE
-            1=1
-    """
+  SELECT * FROM (
+    -- Quotation part
+    SELECT
+        l.og_name AS customer,
+        l.place,
+        l.vertical,
+        l.name AS lead_id,
+        e.name AS enquiry_id,
+        q.name AS quotation_id,
+        qi.item_code AS item_code,
+        qi.item_name AS item,
+        qi.item_group AS item_group,
+        qi.qty AS qty,
+        qi.rate AS rate,
+        qi.amount AS amount,
+        q.probability AS probability,
+        l.expected_order_date,
+        q.status AS status
+    FROM
+        `tabLead` l
+    JOIN
+        `tabEnquiry` e ON l.name = e.lead
+    JOIN
+        `tabQuotation` q ON e.name = q.enquiry
+    JOIN
+        `tabQuotation Item` qi ON q.name = qi.parent
+    WHERE
+     l.name is not null
+		{0}
+
+    UNION
+
+    -- Enquiry part
+    SELECT
+        l.og_name AS customer,
+        l.place,
+        l.vertical,
+        l.name AS lead_id,
+        e.name AS enquiry_id,
+        NULL AS quotation_id,
+        ei.item_code AS item_code,
+        ei.item_name AS item,
+        ei.item_group AS item_group,
+        ei.qty AS qty,
+        ei.rate AS rate,
+        ei.amount AS amount,
+        e.probability AS probability,
+        l.expected_order_date,
+        CASE
+            WHEN e.docstatus = 2 THEN 'Cancelled'
+            ELSE e.enquiry_status
+        END AS status
+    FROM
+        `tabLead` l
+    JOIN
+        `tabEnquiry` e ON l.name = e.lead
+    JOIN
+        `tabEnquiry Item` ei ON e.name = ei.parent
+    LEFT JOIN
+        `tabQuotation` q ON e.name = q.enquiry
+    WHERE
+        q.name IS NULL
+       {0}
+) x 
+
+
+    """.format(cond)
 
     if customer:
         query += " AND l.og_name = %(customer)s"
