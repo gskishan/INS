@@ -124,12 +124,12 @@ def get_data(filters=None):
             l.name AS lead_id,
             e.name AS enquiry_id,
             q.name AS quotation_id,
-            COALESCE(qi.item_code, ei.item_code) AS item_code,
-            COALESCE(qi.item_name, ei.item_name) AS item,
-            COALESCE(qi.item_group, ei.item_group) AS item_group,
-            COALESCE(qi.qty, ei.qty) AS qty,
-            COALESCE(qi.rate, ei.rate) AS rate,
-            COALESCE(qi.amount, ei.amount) AS amount,
+	    ei.item_code AS item_code,
+            ei.item_name AS item,
+            ei.item_group AS item_group,
+            ei.qty AS qty,
+            ei.rate AS rate,
+            ei.amount AS amount,
             COALESCE(q.probability, e.probability, l.probability) AS probability,
             l.expected_order_date,
             CASE
@@ -155,7 +155,7 @@ def get_data(filters=None):
     if from_date and to_date:
         query += " AND l.enquiry_date BETWEEN %(from_date)s AND %(to_date)s"
 
-    query += "    GROUP BY l.name, e.name, q.name ORDER BY l.name, e.name, q.name"
+    query += "    GROUP BY ei.item_code ORDER BY l.name, e.name, q.name"
 
     data = frappe.db.sql(query, {
         'customer': customer,
