@@ -155,7 +155,7 @@ def get_data(filters=None):
     if from_date and to_date:
         query += " AND l.enquiry_date BETWEEN %(from_date)s AND %(to_date)s"
 
-    query += " ORDER BY l.name, e.name, q.name"
+    query += "    GROUP BY l.name, e.name, q.name ORDER BY l.name, e.name, q.name"
 
     data = frappe.db.sql(query, {
         'customer': customer,
