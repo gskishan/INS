@@ -8,7 +8,7 @@ class Enquiry(Document):
 
 
     @frappe.whitelist()
-    def get_customer_address(customer):
+    def get_customer_address(self,customer):
         address = frappe.db.get_value('Dynamic Link', 
             {'link_doctype': 'Customer', 'link_name': customer, 'parenttype': 'Address'}, 'parent')
         
