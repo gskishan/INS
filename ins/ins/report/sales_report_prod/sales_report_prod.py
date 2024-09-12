@@ -99,159 +99,93 @@ def get_columns(filters= None):
 	]
 
 
-def get_data(filters= None):
+def get_data(filters=None):
+    customer = filters.customer
+    from_date = filters.from_date
+    to_date = filters.to_date
+    cond = ""
 
-	customer = filters.customer
-	from_date = filters.from_date
-	to_date = filters.to_date
-	
-	result = []
-	
-	resultant_leads = get_leads(customer,from_date, to_date)
-	resultant_enquiry = get_enquiry()
-	resultant_quotation = get_quotations()
-	
-	# Loop All Leads if it matches then update the row
-	for each_lead in resultant_leads:
-		row = {
-				'customer': customer, 
-				'place': '', 
-				'vertical': '', 
-				'lead_id': '', 
-				'enquiry_id': '', 
-				'quotation_id': '', 
-				'item_code': '', 
-				'item': '', 
-				'item_group': '', 
-				'qty': 0, 
-				'probability': '', 
-				'link_lead': '',
-				'link_enquiry': '',
-				'expected_order_date':'',
-				'status': ''
-			}
-		
-		row.update(each_lead)
-		
-		# Check for Linked Enquiry if it matches then update the row
-		for each_enquiry in resultant_enquiry:
+    if customer:
+        cond += "AND l.og_name = '{0}' ".format(customer)
+    if from_date and to_date:
+        cond += "AND l.enquiry_date BETWEEN '{1}' AND '{2}' ".format(from_date, to_date)
 
-			if each_lead["lead_id"] == each_enquiry['link_lead'] and each_enquiry["item_code"] == each_lead["item_code"]:
-				row.update(each_enquiry)
-				
-				amended_quotation = {}
-				# Check for Linked Quotation if it matches then update the row
-				for each_quotation in resultant_quotation:
-					if each_quotation["amended_from"] and each_quotation["status"] != "Cancelled":
-						if each_enquiry["enquiry_id"] == each_quotation["link_enquiry"] and each_enquiry["item_code"] == each_quotation["item_code"]:
-							row.update(each_quotation)
-							amended_quotation = each_quotation
-					else:
-						if each_enquiry["enquiry_id"] == each_quotation["link_enquiry"] and each_enquiry["item_code"] == each_quotation["item_code"]:
-							row.update(each_quotation)
+    query = """
+    SELECT * FROM (
+        -- Lead, Enquiry, and Quotation linked data
+        SELECT
+            l.og_name AS customer,
+            l.place,
+            l.vertical,
+            l.name AS lead_id,
+            e.name AS enquiry_id,
+            q.name AS quotation_id,
+            qi.item_code AS item_code,
+            qi.item_name AS item,
+            qi.item_group AS item_group,
+            qi.qty AS qty,
+            qi.rate AS rate,
+            qi.amount AS amount,
+            q.probability AS probability,
+            l.expected_order_date,
+            q.status AS status,
+            q.amended_from
+        FROM
+            `tabLead` l
+        LEFT JOIN
+            `tabEnquiry` e ON l.name = e.lead
+        LEFT JOIN
+            `tabQuotation` q ON e.name = q.enquiry AND q.status != 'Cancelled'
+        LEFT JOIN
+            `tabQuotation Item` qi ON q.name = qi.parent
+        WHERE
+            l.name IS NOT NULL
+            {0}
 
-				if amended_quotation:
-					row.update(amended_quotation)
+        UNION ALL
 
-		result.append(row)
-	
-	return result
+        -- Leads without Quotation
+        SELECT
+            l.og_name AS customer,
+            l.place,
+            l.vertical,
+            l.name AS lead_id,
+            e.name AS enquiry_id,
+            NULL AS quotation_id,
+            ei.item_code AS item_code,
+            ei.item_name AS item,
+            ei.item_group AS item_group,
+            ei.qty AS qty,
+            NULL AS rate,
+            NULL AS amount,
+            e.probability AS probability,
+            l.expected_order_date,
+            CASE
+                WHEN e.enquiry_status IS NOT NULL THEN e.enquiry_status
+                ELSE
+                    CASE
+                        WHEN e.docstatus = 2 THEN 'Cancelled'
+                        WHEN e.docstatus = 0 THEN 'Draft'
+                        WHEN e.docstatus = 1 THEN 'Submitted'
+                    END
+            END AS status,
+            NULL AS amended_from
+        FROM
+            `tabLead` l
+        LEFT JOIN
+            `tabEnquiry` e ON l.name = e.lead
+        LEFT JOIN
+            `tabEnquiry Item` ei ON e.name = ei.parent
+        LEFT JOIN
+            `tabQuotation` q ON e.name = q.enquiry
+        WHERE
+            q.name IS NULL
+            {0}
+    ) AS data
+    """.format(cond)
 
+    # Execute the query with the given filters
+    data = frappe.db.sql(query, as_dict=True)
+    frappe.errprint(query)
 
-
-def get_leads(customer, from_date, to_date):
-
-	filters={}
-	if customer:
-		filters['og_name'] = customer
-	if from_date and to_date:
-		filters["enquiry_date"] = ["between", [from_date, to_date]]
-
-	# Get Lead
-	leads = frappe.db.get_all('Lead',
-		filters=filters,
-		fields=['name', 'og_name'],
-	)
-
-	result = []
-	for each in leads:
-		each_lead = frappe.get_doc("Lead", each.name)
-		
-		for each_item in each_lead.items: 
-			row={}
-			row["customer"] =  each.og_name 
-			row["lead_id"] =  each.name 
-			row["item_code"] = each_item.item_code 
-			row["item"] = each_item.item_name
-			row["item_group"] = each_item.item_group 
-			row["qty"] = each_item.qty
-			row["expected_order_date"] = each_lead.expected_order_date 
-			row["probability"] = each_lead.probability 
-			row["place"] = each_lead.place 
-			row["status"] = each_lead.status 
-			row["vertical"] = each_lead.vertical 
-
-			result.append(row)
-
-	return result
-
-
-
-def get_enquiry():
-
-	# Get Enquiry
-	enquiry = frappe.db.get_all('Enquiry',
-		fields=['name','customer'],
-	)
-
-	result = []
-	for each in enquiry:
-		each_enq= frappe.get_doc("Enquiry", each.name)
-		for each_item in each_enq.items:
-			row = {}
-			row["customer"] =  each.customer 
-			row["enquiry_id"] = each.name
-			row["item_code"] = each_item.item_code 
-			row["item"] = each_item.item_name
-			row["item_group"] = each_item.item_group
-			row["qty"] = each_item.qty
-			row["link_lead"] = each_enq.lead 
-			row["status"] = each_enq.enquiry_status 
-			row["expected_order_date"] = each_enq.expected_order_date 
-			row["probability"] = each_enq.probability 
-			
-			result.append(row)
-
-
-	return result
-
-
-
-
-def get_quotations():
-
-	# Get Quotation
-	quotations = frappe.db.get_all('Quotation',
-		fields=['name','party_name', 'amended_from'],
-	)
-
-	result = []
-	for each in quotations:
-		each_quotation = frappe.get_doc("Quotation", each.name)
-		for item in each_quotation.items:
-			row = {}
-			row["customer"] =  each.party_name 
-			row["quotation_id"] = each.name
-			row["item_code"] = item.item_code
-			row["item"] = item.item_name
-			row["item_group"] = item.item_group # Need to add this Field fetch it from Item
-			row["qty"] = item.qty
-			row["link_enquiry"] = each_quotation.enquiry 
-			row["status"] = each_quotation.status 
-			row["expected_order_date"] = each_quotation.valid_till 
-			row["probability"] = each_quotation.probability 
-			row["amended_from"] = each.amended_from
-
-			result.append(row)
-
-	return result
+    return data
