@@ -108,7 +108,7 @@ def get_data(filters=None):
     if customer:
         cond += "AND l.og_name = '{0}' ".format(customer)
     if from_date and to_date:
-        cond += "AND l.enquiry_date BETWEEN '{1}' AND '{2}' ".format(from_date, to_date)
+        cond += "AND l.enquiry_date BETWEEN '{0}' AND '{1}' ".format(from_date, to_date)
 
     query = """
     SELECT * FROM (
