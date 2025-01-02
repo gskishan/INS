@@ -64,8 +64,8 @@ def set_name(doc):
             company_code = '30000'
         sql = """SELECT MAX(sequence)
                     FROM `tab{0}`
-                    WHERE company=%s AND sequence IS NOT NULL""".format(doc.doctype)
-        max_icv = frappe.db.sql(sql, (doc.company,), as_dict=False)[0][0]
+                    WHERE company=%s AND sequence IS NOT NULL  and  YEAR(creation) =%s""".format(doc.doctype)
+        max_icv = frappe.db.sql(sql, (doc.company,get_year(self.posting_date)), as_dict=False)[0][0]
         if max_icv is not None:
             sequence = max_icv + 1
         else:
