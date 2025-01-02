@@ -36,7 +36,7 @@ def validate(self, method=None):
                 SELECT MAX(sequence) 
                 FROM `tabSales Invoice`
                 WHERE company=%s AND sequence IS NOT NULL 
-                AND creation BETWEEN %s AND %s
+                AND posting_date BETWEEN %s AND %s
             """
             last_count = frappe.db.sql(sql, (self.company, fiscal_start, fiscal_end), as_dict=False)
 
@@ -74,7 +74,7 @@ def set_name(doc):
             SELECT MAX(sequence)
             FROM `tab{0}`
             WHERE company=%s AND sequence IS NOT NULL 
-            AND creation BETWEEN %s AND %s
+            AND posting_date BETWEEN %s AND %s
         """.format(doc.doctype)
         
         max_sequence = frappe.db.sql(sql, (doc.company, fiscal_start, fiscal_end), as_dict=False)
