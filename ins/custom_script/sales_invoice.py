@@ -66,7 +66,7 @@ def set_name(doc):
         company_codes = {
             "insmart Systems": "10000",
             "insmart Systems India Private Limited": "20000",
-            "OIA TECHNOLOGIES PRIVATE LIMITED": "30000"
+            "Insmart Systems and Automation Private Limited": "30000"
         }
         company_code = company_codes.get(doc.company, "00000")
 
